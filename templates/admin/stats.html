@@ -1,0 +1,685 @@
+{% extends "layout.html" %}
+
+{% block title %}Statistics - Admin - ISU Lost n Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .page-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .page-header-logo {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .page-header p {
+        color: var(--text-muted);
+        margin: 0;
+    }
+    
+    /* Admin Nav */
+    .admin-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .admin-nav a {
+        padding: 0.65rem 1.25rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .admin-nav a:hover {
+        background: var(--bg-muted);
+    }
+    
+    .admin-nav a.active {
+        background: var(--emerald);
+        border-color: var(--emerald);
+        color: white;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.25rem;
+    }
+    
+    .stat-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+    
+    .stat-icon.blue { background: var(--blue-bg); color: var(--blue-accent); }
+    .stat-icon.coral { background: var(--coral-bg); color: var(--coral-accent); }
+    .stat-icon.emerald { background: var(--emerald-bg); color: var(--emerald); }
+    .stat-icon.gold { background: var(--gold-bg); color: var(--gold-accent); }
+    
+    .stat-card h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1;
+    }
+    
+    .stat-card p {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin: 0.25rem 0 0 0;
+    }
+    
+    /* Sections */
+    .section {
+        margin-bottom: 2rem;
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .section-header h2 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-header h2 i {
+        color: var(--emerald);
+    }
+    
+    /* Cards Grid */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        padding: 1rem 1.25rem;
+        background: var(--bg-muted);
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .card-header h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+    
+    .card-header h3 i {
+        color: var(--emerald);
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    /* Location List */
+    .location-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .location-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .location-item:last-child {
+        border-bottom: none;
+    }
+    
+    .location-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+    
+    .location-stats {
+        display: flex;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .location-stats span {
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+    }
+    
+    .location-stats .lost {
+        background: var(--coral-bg);
+        color: var(--coral-accent);
+    }
+    
+    .location-stats .found {
+        background: var(--emerald-bg);
+        color: var(--emerald);
+    }
+    
+    /* Recovery Rate Card */
+    .recovery-card {
+        background: linear-gradient(135deg, var(--emerald), #059669);
+        color: white;
+        border: none;
+    }
+    
+    .recovery-card .card-body {
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .recovery-rate {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .recovery-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+    
+    /* Matches Section */
+    .matches-card {
+        grid-column: 1 / -1;
+    }
+    
+    .matches-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .match-item {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .match-item:last-child {
+        border-bottom: none;
+    }
+    
+    .match-info {
+        flex: 1;
+    }
+    
+    .match-pair {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .match-pair .item-name {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    
+    .match-pair .lost-tag {
+        color: var(--coral-accent);
+    }
+    
+    .match-pair .found-tag {
+        color: var(--emerald);
+    }
+    
+    .match-pair i {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+    
+    .match-location {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    
+    .match-location .same-loc {
+        color: var(--emerald);
+        font-weight: 500;
+    }
+    
+    .match-score {
+        background: var(--emerald-bg);
+        color: var(--emerald);
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .match-score.high {
+        background: var(--emerald);
+        color: white;
+    }
+    
+    .match-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        color: var(--text-muted);
+    }
+    
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+        display: block;
+        opacity: 0.5;
+    }
+    
+    .empty-state p {
+        margin: 0;
+    }
+    
+    /* Alert Cards */
+    .alert-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .alert-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .alert-card.warning {
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .alert-card.info {
+        border-left: 4px solid var(--blue-accent);
+    }
+    
+    .alert-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .alert-card.warning .alert-card-icon {
+        background: rgba(251, 191, 36, 0.15);
+        color: #f59e0b;
+    }
+    
+    .alert-card.info .alert-card-icon {
+        background: var(--blue-bg);
+        color: var(--blue-accent);
+    }
+    
+    .alert-card-content h4 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .alert-card-content p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+    
+    /* Algorithm Info */
+    .algo-info {
+        background: var(--bg-muted);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    
+    .algo-info code {
+        background: var(--bg-card);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        color: var(--emerald);
+    }
+    
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .cards-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        .alert-stats {
+            grid-template-columns: 1fr;
+        }
+        .admin-nav {
+            flex-wrap: wrap;
+        }
+        .admin-nav a {
+            flex: 1;
+            justify-content: center;
+            min-width: 120px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <img src="{{ url_for('static', filename='Logo/Logo.png') }}" alt="ISU Logo" class="page-header-logo">
+        <div>
+            <h1>Statistics Dashboard</h1>
+            <p>Overview of Lost & Found activity</p>
+        </div>
+    </div>
+</div>
+
+<div class="admin-nav">
+    <a href="{{ url_for('admin_claims') }}">
+        <i class="fas fa-hand-paper"></i> Pending Claims
+    </a>
+    <a href="{{ url_for('admin_stats') }}" class="active">
+        <i class="fas fa-chart-pie"></i> Statistics
+    </a>
+</div>
+
+<!-- Pending Items Alert -->
+{% if pending_claims > 0 %}
+<div class="alert-stats">
+    <a href="{{ url_for('admin_claims') }}" class="alert-card warning" style="text-decoration: none;">
+        <div class="alert-card-icon">
+            <i class="fas fa-hand-paper"></i>
+        </div>
+        <div class="alert-card-content">
+            <h4>{{ pending_claims }}</h4>
+            <p>Claims awaiting review</p>
+        </div>
+    </a>
+</div>
+{% endif %}
+
+<!-- Main Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-icon blue">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+        </div>
+        <h3>{{ total_reports }}</h3>
+        <p>Total Reports</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-icon coral">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+        </div>
+        <h3>{{ total_lost }}</h3>
+        <p>Lost Items</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-icon emerald">
+                <i class="fas fa-hand-holding"></i>
+            </div>
+        </div>
+        <h3>{{ total_found }}</h3>
+        <p>Found Items</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-icon gold">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+        <h3>{{ total_claimed }}</h3>
+        <p>Successfully Claimed</p>
+    </div>
+</div>
+
+<!-- Cards Grid -->
+<div class="cards-grid">
+    <!-- Recovery Rate -->
+    <div class="card recovery-card">
+        <div class="card-body">
+            <div class="recovery-rate">{{ recovery_rate }}%</div>
+            <div class="recovery-label">
+                <i class="fas fa-chart-line"></i> Recovery Rate
+            </div>
+            <p style="opacity: 0.8; font-size: 0.85rem; margin-top: 0.75rem;">
+                {{ total_claimed }} of {{ total_found }} found items returned to owners
+            </p>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-clock"></i> Last 7 Days</h3>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
+                <div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">{{ recent_reports }}</div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem;">New Reports</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary);">{{ recent_claims }}</div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem;">New Claims</div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); text-align: center;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;">
+                    <i class="fas fa-users"></i> {{ total_users }} registered users
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Locations -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-map-marker-alt"></i> Top Locations</h3>
+        </div>
+        <div class="card-body">
+            {% if top_locations %}
+            <ul class="location-list">
+                {% for loc in top_locations %}
+                <li class="location-item">
+                    <span class="location-name">{{ loc.location }}</span>
+                    <div class="location-stats">
+                        <span class="lost">{{ loc.lost_count or 0 }} lost</span>
+                        <span class="found">{{ loc.found_count or 0 }} found</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-map-marker-alt"></i>
+                <p>No location data yet</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-info-circle"></i> Quick Stats</h3>
+        </div>
+        <div class="card-body">
+            <ul class="location-list">
+                <li class="location-item">
+                    <span class="location-name">Total Reports</span>
+                    <span style="font-weight: 600; color: var(--emerald);">
+                        {{ total_reports }}
+                    </span>
+                </li>
+                <li class="location-item">
+                    <span class="location-name">Active Found Items</span>
+                    <span style="font-weight: 600; color: var(--text-primary);">
+                        {{ total_found - total_claimed }}
+                    </span>
+                </li>
+                <li class="location-item">
+                    <span class="location-name">Active Lost Reports</span>
+                    <span style="font-weight: 600; color: var(--coral-accent);">
+                        {{ total_lost }}
+                    </span>
+                </li>
+                <li class="location-item">
+                    <span class="location-name">Pending Claims</span>
+                    <span style="font-weight: 600; color: #f59e0b;">
+                        {{ pending_claims }}
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- AI Matching Section -->
+    <div class="card matches-card">
+        <div class="card-header">
+            <h3><i class="fas fa-magic"></i> AI-Powered Item Matching</h3>
+        </div>
+        <div class="card-body">
+            <div class="algo-info">
+                <i class="fas fa-brain"></i> 
+                Using <code>TF-IDF</code> with <code>Cosine Similarity</code> algorithm to find potential matches between lost and found items based on text similarity.
+            </div>
+            
+            {% if potential_matches %}
+            <ul class="matches-list">
+                {% for match in potential_matches %}
+                <li class="match-item">
+                    <div class="match-info">
+                        <div class="match-pair">
+                            <span class="lost-tag"><i class="fas fa-exclamation-circle"></i></span>
+                            <span class="item-name">{{ match.lost_item.title }}</span>
+                            <i class="fas fa-arrow-right"></i>
+                            <span class="found-tag"><i class="fas fa-hand-holding"></i></span>
+                            <span class="item-name">{{ match.found_item.title }}</span>
+                        </div>
+                        <div class="match-location">
+                            {% if match.same_location %}
+                            <span class="same-loc"><i class="fas fa-check"></i> Same location: {{ match.lost_item.location }}</span>
+                            {% else %}
+                            {{ match.lost_item.location }} → {{ match.found_item.location }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="match-score {{ 'high' if match.score >= 50 else '' }}">
+                        {{ match.score }}% match
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <p>No potential matches found yet.</p>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem;">Matches appear when lost and found item descriptions are similar.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

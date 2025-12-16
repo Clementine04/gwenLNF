@@ -1,0 +1,238 @@
+{% extends "layout.html" %}
+
+{% block title %}Browse Items - ISU Lost n Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .page-header h1 i {
+        color: var(--emerald);
+    }
+    
+    .page-header p {
+        color: var(--text-muted);
+    }
+    
+    /* Filter Section */
+    .filter-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-row .form-group {
+        flex: 1;
+        min-width: 200px;
+        margin-bottom: 0;
+    }
+    
+    .filter-row .btn {
+        align-self: flex-end;
+        height: fit-content;
+    }
+    
+    /* Items Grid */
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+    }
+    
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.25rem;
+        background: var(--bg-muted);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: var(--text-muted);
+    }
+    
+    .empty-state h3 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination-btn {
+        padding: 0.5rem 0.85rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-weight: 500;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .pagination-btn:hover {
+        background: var(--bg-muted);
+    }
+    
+    .pagination-btn.active {
+        background: var(--emerald);
+        border-color: var(--emerald);
+        color: white;
+    }
+    
+    .pagination-btn.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    @media (max-width: 1024px) {
+        .items-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .items-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .filter-row {
+            flex-direction: column;
+        }
+        
+        .filter-row .form-group {
+            min-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-search"></i> Browse Items</h1>
+    <p>Search through all reported lost and found items</p>
+</div>
+
+<!-- Filter Section -->
+<div class="filter-card">
+    <form method="GET" action="{{ url_for('search') }}">
+        <div class="filter-row">
+            <div class="form-group">
+                <label class="form-label">Keyword</label>
+                <input type="text" name="q" class="form-control" placeholder="Search by title or description..." value="{{ request.args.get('q', '') }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <select name="type" class="form-control">
+                    <option value="">All Types</option>
+                    <option value="lost" {{ 'selected' if request.args.get('type') == 'lost' }}>Lost Items</option>
+                    <option value="found" {{ 'selected' if request.args.get('type') == 'found' }}>Found Items</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="start_date" class="form-control" value="{{ request.args.get('start_date', '') }}">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Results -->
+{% if reports %}
+<div class="items-grid">
+    {% for report in reports %}
+    <div class="item-card">
+        <div class="item-card-image">
+            {% if report.photo_filename %}
+            <img src="{{ url_for('static', filename='uploads/' + report.photo_filename) }}" alt="{{ report.title }}">
+            {% else %}
+            <div class="item-card-placeholder">
+                <i class="fas fa-image"></i>
+                <span>No image</span>
+            </div>
+            {% endif %}
+            <span class="badge {{ 'badge-lost' if report.type == 'lost' else 'badge-found' }} item-card-type">
+                {{ report.type|capitalize }}
+            </span>
+            <span class="item-card-date">{{ report.created_at.strftime('%b %d') }}</span>
+        </div>
+        <div class="item-card-content">
+            <h4 class="item-card-title">{{ report.title }}</h4>
+            <p class="item-card-desc">{{ report.description|truncate(80) }}</p>
+            <div class="item-card-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ report.location }}</span>
+                <span><i class="fas fa-user"></i> {{ report.reporter.name }}</span>
+            </div>
+        </div>
+        <div class="item-card-footer">
+            <a href="{{ url_for('report_detail', report_id=report.id) }}" class="btn btn-outline btn-block btn-sm">
+                View Details
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <i class="fas fa-search"></i>
+    </div>
+    <h3>No Items Found</h3>
+    <p>Try adjusting your search filters or be the first to report an item!</p>
+    <div class="d-flex gap-2" style="justify-content: center;">
+        <a href="{{ url_for('new_report', type='lost') }}" class="btn btn-danger">Report Lost</a>
+        <a href="{{ url_for('new_report', type='found') }}" class="btn btn-primary">Report Found</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

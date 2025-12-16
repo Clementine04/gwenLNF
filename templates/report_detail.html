@@ -1,0 +1,564 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ report.title }} - ISU Lost n Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        transition: color 0.2s;
+    }
+    
+    .back-link:hover {
+        color: var(--emerald);
+    }
+    
+    .report-layout {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 2rem;
+    }
+    
+    /* Image Section */
+    .report-image-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .report-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+    }
+    
+    .report-image-placeholder {
+        width: 100%;
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-muted);
+        color: var(--text-muted);
+    }
+    
+    .report-image-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Details Section */
+    .report-details-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+    }
+    
+    .report-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .report-badges {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .report-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .report-date {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .report-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .report-section h3 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .report-section p {
+        color: var(--text-primary);
+        line-height: 1.7;
+    }
+    
+    .report-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-muted);
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .report-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .report-meta-icon {
+        width: 36px;
+        height: 36px;
+        background: var(--bg-card);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--emerald);
+    }
+    
+    .report-meta-text span {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+    
+    .report-meta-text strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    .report-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    /* Claims Section */
+    .claims-section {
+        grid-column: 1 / -1;
+        margin-top: 2rem;
+    }
+    
+    .claims-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+    }
+    
+    .claims-header {
+        padding: 1rem 1.5rem;
+        background: var(--bg-muted);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .claims-header h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .claims-header h2 i {
+        color: var(--emerald);
+    }
+    
+    .claim-count {
+        background: var(--emerald);
+        color: white;
+        padding: 0.25rem 0.65rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .claims-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    
+    .claim-item {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .claim-item:last-child {
+        border-bottom: none;
+    }
+    
+    .claim-info {
+        flex: 1;
+    }
+    
+    .claim-user {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .claim-user strong {
+        color: var(--text-primary);
+    }
+    
+    .claim-desc {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 0.5rem;
+    }
+    
+    .claim-meta {
+        display: flex;
+        gap: 1rem;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+    
+    .claim-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    
+    .claim-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+    
+    .no-claims {
+        padding: 2rem;
+        text-align: center;
+        color: var(--text-muted);
+    }
+    
+    .no-claims i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    /* Alert Cards */
+    .alert-card {
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .alert-card.alert-warning {
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05));
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+    
+    .alert-card.alert-success {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .alert-card.alert-info {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .alert-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .alert-warning .alert-card-icon {
+        background: rgba(251, 191, 36, 0.2);
+        color: #f59e0b;
+    }
+    
+    .alert-success .alert-card-icon {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--emerald);
+    }
+    
+    .alert-info .alert-card-icon {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+    }
+    
+    .alert-card-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .alert-card-content p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.5;
+    }
+    
+    .claim-code-box {
+        background: var(--bg-card);
+        border: 2px dashed var(--emerald);
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .claim-code-box .code {
+        font-size: 1.75rem;
+        font-weight: 700;
+        font-family: monospace;
+        letter-spacing: 4px;
+        color: var(--emerald);
+    }
+    
+    .claim-code-box .label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+    
+    @media (max-width: 900px) {
+        .report-layout {
+            grid-template-columns: 1fr;
+        }
+        
+        .report-image,
+        .report-image-placeholder {
+            height: 300px;
+        }
+        
+        .report-meta {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('search') }}" class="back-link">
+    <i class="fas fa-arrow-left"></i> Back to search
+</a>
+
+<div class="report-layout">
+    <!-- Image Section -->
+    <div class="report-image-card">
+        {% if report.photo_filename %}
+        <img src="{{ url_for('static', filename='uploads/' + report.photo_filename) }}" alt="{{ report.title }}" class="report-image">
+        {% else %}
+        <div class="report-image-placeholder">
+            <i class="fas fa-image"></i>
+            <span>No image available</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Details Section -->
+    <div class="report-details-card">
+        <!-- Notification for Finder to Surrender Item -->
+        {% if current_user.is_authenticated and report.type == 'found' and report.reporter_id == current_user.id and report.status == 'claimed' %}
+        <div class="alert-card alert-warning">
+            <div class="alert-card-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="alert-card-content">
+                <h4>Action Required: Surrender Item</h4>
+                <p>A claim for this item has been approved! Please surrender the item to <strong>SCC Office</strong> as soon as possible. The claimant will present their verification code to collect the item.</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Notification for Claimer with Claim Code -->
+        {% if current_user.is_authenticated and user_claim and user_claim.status == 'accepted' %}
+        <div class="alert-card alert-success">
+            <div class="alert-card-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="alert-card-content">
+                <h4>Claim Approved!</h4>
+                <p>Your claim has been approved. Please proceed to <strong>{{ user_claim.pickup_location or 'SCC Office' }}</strong> to collect your item. Present the code below along with your Student ID for verification.</p>
+                {% if user_claim.pickup_instructions %}
+                <p style="margin-top: 0.5rem;"><small>{{ user_claim.pickup_instructions }}</small></p>
+                {% endif %}
+                <div class="claim-code-box">
+                    <div class="label">Your Claim Code</div>
+                    <div class="code">{{ user_claim.claim_code }}</div>
+                </div>
+            </div>
+        </div>
+        {% elif current_user.is_authenticated and user_claim and user_claim.status == 'pending' %}
+        <div class="alert-card alert-info">
+            <div class="alert-card-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="alert-card-content">
+                <h4>Claim Pending Review</h4>
+                <p>Your claim request is being reviewed by an administrator. You will receive a verification code once approved.</p>
+            </div>
+        </div>
+        {% elif current_user.is_authenticated and user_claim and user_claim.status == 'rejected' %}
+        <div class="alert-card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05)); border: 1px solid rgba(239, 68, 68, 0.3);">
+            <div class="alert-card-icon" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="alert-card-content">
+                <h4>Claim Rejected</h4>
+                <p>Unfortunately, your claim was not approved. {% if user_claim.admin_comment %}Reason: {{ user_claim.admin_comment }}{% endif %}</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="report-header">
+            <div class="report-badges">
+                <span class="badge {{ 'badge-lost' if report.type == 'lost' else 'badge-found' }}">
+                    <i class="fas {{ 'fa-exclamation-circle' if report.type == 'lost' else 'fa-hand-holding' }}"></i>
+                    {{ report.type|capitalize }}
+                </span>
+                <span class="badge {{ 'badge-approved' if report.status == 'approved' else 'badge-pending' if report.status == 'pending' else 'badge-claimed' }}">
+                    {{ report.status|capitalize }}
+                </span>
+            </div>
+            <h1>{{ report.title }}</h1>
+            <div class="report-date">
+                <i class="fas fa-calendar-alt"></i>
+                Reported on {{ report.created_at.strftime('%B %d, %Y') }}
+            </div>
+        </div>
+        
+        <div class="report-section">
+            <h3>Description</h3>
+            <p>{{ report.description }}</p>
+        </div>
+        
+        <div class="report-meta">
+            <div class="report-meta-item">
+                <div class="report-meta-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="report-meta-text">
+                    <span>Location</span>
+                    <strong>{{ report.location }}</strong>
+                </div>
+            </div>
+            <div class="report-meta-item">
+                <div class="report-meta-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="report-meta-text">
+                    <span>Reported by</span>
+                    <strong>{{ report.reporter.name }}</strong>
+                </div>
+            </div>
+            <div class="report-meta-item">
+                <div class="report-meta-icon">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div class="report-meta-text">
+                    <span>Date Lost/Found</span>
+                    <strong>{{ report.date_time.strftime('%b %d, %Y at %I:%M %p') }}</strong>
+                </div>
+            </div>
+            <div class="report-meta-item">
+                <div class="report-meta-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="report-meta-text">
+                    <span>Status</span>
+                    <strong>{{ report.status|capitalize }}</strong>
+                </div>
+            </div>
+        </div>
+        
+        {% if current_user.is_authenticated and current_user.id != report.reporter_id and report.type == 'found' and report.status == 'approved' %}
+        <div class="report-actions">
+            <a href="{{ url_for('new_claim', report_id=report.id) }}" class="btn btn-primary btn-lg btn-block">
+                <i class="fas fa-hand-paper"></i> Claim This Item
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Claims Section (Admin View) -->
+    {% if current_user.is_authenticated and current_user.role == 'admin' and report.claim_requests %}
+    <div class="claims-section">
+        <div class="claims-card">
+            <div class="claims-header">
+                <h2><i class="fas fa-clipboard-list"></i> Claims</h2>
+                <span class="claim-count">{{ report.claim_requests|length }}</span>
+            </div>
+            <ul class="claims-list">
+                {% for claim in report.claim_requests %}
+                <li class="claim-item">
+                    <div class="claim-info">
+                        <div class="claim-user">
+                            <strong>{{ claim.claimer.name }}</strong>
+                            <span class="badge {{ 'badge-approved' if claim.status == 'accepted' else 'badge-pending' }}">
+                                {{ claim.status|capitalize }}
+                            </span>
+                        </div>
+                        <p class="claim-desc">{{ claim.message }}</p>
+                        <div class="claim-meta">
+                            <span><i class="fas fa-calendar"></i> {{ claim.request_date.strftime('%b %d, %Y') }}</span>
+                            <span><i class="fas fa-envelope"></i> {{ claim.claimer.email }}</span>
+                        </div>
+                    </div>
+                    {% if claim.status == 'pending' %}
+                    <div class="claim-actions">
+                        <form action="{{ url_for('approve_claim', claim_id=claim.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                        </form>
+                        <form action="{{ url_for('reject_claim', claim_id=claim.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

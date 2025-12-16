@@ -1,0 +1,280 @@
+{% extends "layout.html" %}
+
+{% block title %}Match Items - ISU Lost n Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .page-header h1 i {
+        color: var(--emerald);
+    }
+    
+    .page-header p {
+        color: var(--text-muted);
+    }
+    
+    .match-container {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+    
+    .match-arrow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    
+    .match-arrow i {
+        font-size: 2rem;
+        color: var(--emerald);
+    }
+    
+    .match-arrow span {
+        margin-top: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+    
+    /* Item Card */
+    .match-item-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .match-item-image {
+        height: 200px;
+        background: var(--bg-muted);
+    }
+    
+    .match-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .match-item-placeholder {
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        background: var(--bg-muted);
+    }
+    
+    .match-item-placeholder i {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .match-item-content {
+        padding: 1.25rem;
+    }
+    
+    .match-item-type {
+        margin-bottom: 0.75rem;
+    }
+    
+    .match-item-content h3 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .match-item-desc {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .match-item-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .match-item-meta span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .match-item-meta i {
+        width: 16px;
+        color: var(--emerald);
+    }
+    
+    /* Form Section */
+    .match-form-card {
+        grid-column: 1 / -1;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .match-form-card h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .match-form-card h2 i {
+        color: var(--emerald);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    @media (max-width: 900px) {
+        .match-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .match-arrow {
+            flex-direction: row;
+            padding: 1rem 0;
+        }
+        
+        .match-arrow i {
+            transform: rotate(90deg);
+        }
+        
+        .match-arrow span {
+            margin-top: 0;
+            margin-left: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-link"></i> Confirm Item Match</h1>
+    <p>Review and confirm that these items match</p>
+</div>
+
+<div class="match-container">
+    <!-- Lost Item -->
+    <div class="match-item-card">
+        {% if lost_report.photo_filename %}
+        <div class="match-item-image">
+            <img src="{{ url_for('static', filename='uploads/' + lost_report.photo_filename) }}" alt="{{ lost_report.title }}">
+        </div>
+        {% else %}
+        <div class="match-item-placeholder">
+            <i class="fas fa-image"></i>
+            <span>No image</span>
+        </div>
+        {% endif %}
+        
+        <div class="match-item-content">
+            <div class="match-item-type">
+                <span class="badge badge-lost">
+                    <i class="fas fa-exclamation-circle"></i> Lost Item
+                </span>
+            </div>
+            <h3>{{ lost_report.title }}</h3>
+            <p class="match-item-desc">{{ lost_report.description|truncate(150) }}</p>
+            <div class="match-item-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ lost_report.location }}</span>
+                <span><i class="fas fa-calendar"></i> {{ lost_report.date_time.strftime('%b %d, %Y') }}</span>
+                <span><i class="fas fa-user"></i> {{ lost_report.reporter.name }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Arrow -->
+    <div class="match-arrow">
+        <i class="fas fa-exchange-alt"></i>
+        <span>Match</span>
+    </div>
+    
+    <!-- Found Item -->
+    <div class="match-item-card">
+        {% if found_report.photo_filename %}
+        <div class="match-item-image">
+            <img src="{{ url_for('static', filename='uploads/' + found_report.photo_filename) }}" alt="{{ found_report.title }}">
+        </div>
+        {% else %}
+        <div class="match-item-placeholder">
+            <i class="fas fa-image"></i>
+            <span>No image</span>
+        </div>
+        {% endif %}
+        
+        <div class="match-item-content">
+            <div class="match-item-type">
+                <span class="badge badge-found">
+                    <i class="fas fa-hand-holding"></i> Found Item
+                </span>
+            </div>
+            <h3>{{ found_report.title }}</h3>
+            <p class="match-item-desc">{{ found_report.description|truncate(150) }}</p>
+            <div class="match-item-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ found_report.location }}</span>
+                <span><i class="fas fa-calendar"></i> {{ found_report.date_time.strftime('%b %d, %Y') }}</span>
+                <span><i class="fas fa-user"></i> {{ found_report.reporter.name }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Form -->
+    <div class="match-form-card">
+        <h2><i class="fas fa-clipboard-check"></i> Confirm This Match</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            By confirming this match, you are claiming that the found item is the same as your lost item. 
+            An admin will review your claim.
+        </p>
+        
+        <form method="POST" action="">
+            <div class="form-group">
+                <label class="form-label">Additional Message (Optional)</label>
+                <textarea name="message" class="form-control" rows="4" placeholder="Provide any additional details that prove this is your item...">This is my lost item.</textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-check"></i> Confirm Match
+                </button>
+                <a href="{{ url_for('user_dashboard') }}" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

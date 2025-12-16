@@ -1,0 +1,311 @@
+{% extends "layout.html" %}
+
+{% block title %}Report {{ report_type|capitalize }} Item - ISU Lost n Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .page-header h1 i {
+        color: {{ 'var(--coral-accent)' if report_type == 'lost' else 'var(--emerald)' }};
+    }
+    
+    .page-header p {
+        color: var(--text-muted);
+    }
+    
+    .form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        max-width: 700px;
+    }
+    
+    .form-card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-muted);
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .form-card-header h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-card-header h2 i {
+        color: var(--emerald);
+    }
+    
+    .form-card-body {
+        padding: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .form-row .form-group {
+        margin-bottom: 0;
+    }
+    
+    .file-upload-area {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        background: var(--bg-muted);
+    }
+    
+    .file-upload-area:hover {
+        border-color: var(--emerald);
+        background: rgba(16, 185, 129, 0.05);
+    }
+    
+    .file-upload-area .upload-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .file-upload-area .upload-icon i {
+        font-size: 1.25rem;
+        color: var(--emerald);
+    }
+    
+    .file-upload-area .upload-text {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-upload-area .upload-hint {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+    
+    .file-upload-area input[type="file"] {
+        display: none;
+    }
+    
+    .file-upload-area.has-file {
+        border-color: var(--emerald);
+        background: rgba(16, 185, 129, 0.05);
+    }
+    
+    .file-upload-area.has-file .upload-icon {
+        background: var(--emerald);
+    }
+    
+    .file-upload-area.has-file .upload-icon i {
+        color: white;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: 1.5rem;
+    }
+    
+    .form-actions .btn {
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    
+    @media (max-width: 640px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <i class="fas {{ 'fa-exclamation-circle' if report_type == 'lost' else 'fa-hand-holding' }}"></i>
+        Report {{ report_type|capitalize }} Item
+    </h1>
+    <p>Fill in the details below to submit your report</p>
+</div>
+
+<div class="form-card">
+    <div class="form-card-header">
+        <h2><i class="fas fa-info-circle"></i> Item Information</h2>
+    </div>
+    <div class="form-card-body">
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.title.label(class="form-label") }}
+                {% if form.title.errors %}
+                    {{ form.title(class="form-control is-invalid", placeholder="e.g., Blue Umbrella, iPhone 14, Student ID") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.title.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.title(class="form-control", placeholder="e.g., Blue Umbrella, iPhone 14, Student ID") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.description.label(class="form-label") }}
+                {% if form.description.errors %}
+                    {{ form.description(class="form-control is-invalid", placeholder="Describe the item in detail - color, size, brand, distinguishing features...") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.description.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.description(class="form-control", placeholder="Describe the item in detail - color, size, brand, distinguishing features...") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.location.label(class="form-label") }}
+                {% if form.location.errors %}
+                    {{ form.location(class="form-control is-invalid", id="location-select") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.location.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.location(class="form-control", id="location-select") }}
+                {% endif %}
+                <div class="form-text">Select from ISU Cauayan landmarks or choose "Other" for custom location</div>
+            </div>
+            
+            <div class="form-group" id="custom-location-group" style="display: none;">
+                {{ form.custom_location.label(class="form-label") }}
+                {% if form.custom_location.errors %}
+                    {{ form.custom_location(class="form-control is-invalid", placeholder="Enter the specific location...") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.custom_location.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.custom_location(class="form-control", placeholder="Enter the specific location...") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.date_time.label(class="form-label") }}
+                {% if form.date_time.errors %}
+                    {{ form.date_time(class="form-control is-invalid", type="datetime-local") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.date_time.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.date_time(class="form-control", type="datetime-local") }}
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Photo (Optional)</label>
+                <label for="photo" class="file-upload-area" id="upload-area">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <span class="upload-text">Click to upload a photo</span>
+                    <span class="upload-hint">PNG, JPG, JPEG up to 5MB</span>
+                    {{ form.photo(id="photo") }}
+                </label>
+                {% if form.photo.errors %}
+                <div class="invalid-feedback" style="display: block;">
+                    {% for error in form.photo.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn {{ 'btn-danger' if report_type == 'lost' else 'btn-primary' }} btn-lg">
+                    <i class="fas fa-paper-plane"></i> Submit Report
+                </button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // File upload label update
+    document.getElementById('photo').addEventListener('change', function(e) {
+        const uploadArea = document.getElementById('upload-area');
+        const uploadText = uploadArea.querySelector('.upload-text');
+        const uploadIcon = uploadArea.querySelector('.upload-icon i');
+        
+        if (e.target.files && e.target.files[0]) {
+            uploadText.textContent = e.target.files[0].name;
+            uploadArea.classList.add('has-file');
+            uploadIcon.className = 'fas fa-check';
+        } else {
+            uploadText.textContent = 'Click to upload a photo';
+            uploadArea.classList.remove('has-file');
+            uploadIcon.className = 'fas fa-cloud-upload-alt';
+        }
+    });
+    
+    // Location dropdown - show/hide custom location field
+    const locationSelect = document.getElementById('location-select');
+    const customLocationGroup = document.getElementById('custom-location-group');
+    
+    function toggleCustomLocation() {
+        if (locationSelect.value === 'other') {
+            customLocationGroup.style.display = 'block';
+        } else {
+            customLocationGroup.style.display = 'none';
+        }
+    }
+    
+    locationSelect.addEventListener('change', toggleCustomLocation);
+    // Check on page load in case of form errors
+    toggleCustomLocation();
+</script>
+{% endblock %}

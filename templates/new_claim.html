@@ -1,0 +1,287 @@
+{% extends "layout.html" %}
+
+{% block title %}Claim Item - ISU Lost n Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .page-header h1 i {
+        color: var(--emerald);
+    }
+    
+    .page-header p {
+        color: var(--text-muted);
+    }
+    
+    .claim-layout {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 2rem;
+    }
+    
+    /* Item Preview Card */
+    .item-preview {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        position: sticky;
+        top: 100px;
+    }
+    
+    .item-preview-image {
+        height: 220px;
+        background: var(--bg-muted);
+    }
+    
+    .item-preview-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .item-preview-placeholder {
+        height: 220px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        background: var(--bg-muted);
+    }
+    
+    .item-preview-placeholder i {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-preview-content {
+        padding: 1.25rem;
+    }
+    
+    .item-preview-type {
+        margin-bottom: 0.75rem;
+    }
+    
+    .item-preview h3 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-preview-desc {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .item-preview-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+    
+    .item-preview-meta span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .item-preview-meta i {
+        width: 16px;
+        color: var(--emerald);
+    }
+    
+    /* Form Card */
+    .form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+    }
+    
+    .form-card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-muted);
+    }
+    
+    .form-card-header h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-card-header h2 i {
+        color: var(--emerald);
+    }
+    
+    .form-card-body {
+        padding: 1.5rem;
+    }
+    
+    .claim-tips {
+        background: var(--emerald-bg);
+        border: 1px solid #a7f3d0;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .claim-tips h4 {
+        color: var(--emerald-dark);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .claim-tips ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+    
+    .claim-tips li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: 1.5rem;
+    }
+    
+    @media (max-width: 900px) {
+        .claim-layout {
+            grid-template-columns: 1fr;
+        }
+        
+        .item-preview {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-hand-paper"></i> Claim This Item</h1>
+    <p>Provide proof of ownership to claim this item</p>
+</div>
+
+<div class="claim-layout">
+    <!-- Item Preview -->
+    <div class="item-preview">
+        {% if report.photo_filename %}
+        <div class="item-preview-image">
+            <img src="{{ url_for('static', filename='uploads/' + report.photo_filename) }}" alt="{{ report.title }}">
+        </div>
+        {% else %}
+        <div class="item-preview-placeholder">
+            <i class="fas fa-image"></i>
+            <span>No image available</span>
+        </div>
+        {% endif %}
+        
+        <div class="item-preview-content">
+            <div class="item-preview-type">
+                <span class="badge {{ 'badge-lost' if report.type == 'lost' else 'badge-found' }}">
+                    {{ report.type|capitalize }}
+                </span>
+            </div>
+            <h3>{{ report.title }}</h3>
+            <p class="item-preview-desc">{{ report.description|truncate(120) }}</p>
+            <div class="item-preview-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ report.location }}</span>
+                <span><i class="fas fa-calendar"></i> {{ report.created_at.strftime('%B %d, %Y') }}</span>
+                <span><i class="fas fa-user"></i> {{ report.reporter.name }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Claim Form -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <h2><i class="fas fa-clipboard-check"></i> Claim Details</h2>
+        </div>
+        <div class="form-card-body">
+            <div class="claim-tips">
+                <h4><i class="fas fa-lightbulb"></i> Tips for a Successful Claim</h4>
+                <ul>
+                    <li>Describe unique features only the owner would know</li>
+                    <li>Mention when and where you lost the item</li>
+                    <li>Include any serial numbers or identifying marks</li>
+                    <li>Provide contact information for verification</li>
+                </ul>
+            </div>
+            
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.message.label(class="form-label") }}
+                    {% if form.message.errors %}
+                        {{ form.message(class="form-control is-invalid", rows="6", placeholder="Explain why this item belongs to you. Include specific details that prove ownership...") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.message.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.message(class="form-control", rows="6", placeholder="Explain why this item belongs to you. Include specific details that prove ownership...") }}
+                    {% endif %}
+                    <div class="form-text">Be as detailed as possible to help verify your claim</div>
+                </div>
+                
+                {% if lost_reports %}
+                <div class="form-group">
+                    <label class="form-label">Link to Your Lost Report (Optional)</label>
+                    <select name="lost_report_id" class="form-control">
+                        <option value="">-- Select if this matches your lost item --</option>
+                        {% for lost in lost_reports %}
+                        <option value="{{ lost.id }}">{{ lost.title }} - {{ lost.location }} ({{ lost.created_at.strftime('%b %d, %Y') }})</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">If you've reported this item as lost, select it here to link your claim</div>
+                </div>
+                {% endif %}
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane"></i> Submit Claim
+                    </button>
+                    <a href="{{ url_for('report_detail', report_id=report.id) }}" class="btn btn-secondary btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

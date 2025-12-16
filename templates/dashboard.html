@@ -1,0 +1,542 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - ISU Lost n Found{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .page-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .page-header-logo {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .page-header p {
+        color: var(--text-muted);
+        margin: 0;
+    }
+    
+    .page-header-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    
+    .stat-icon.lost {
+        background: var(--coral-bg);
+        color: var(--coral-accent);
+    }
+    
+    .stat-icon.found {
+        background: var(--emerald-bg);
+        color: var(--emerald);
+    }
+    
+    .stat-icon.pending {
+        background: var(--gold-bg);
+        color: var(--gold-accent);
+    }
+    
+    .stat-icon.resolved {
+        background: var(--blue-bg);
+        color: var(--blue-accent);
+    }
+    
+    .stat-content h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1;
+    }
+    
+    .stat-content p {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+    
+    /* Section */
+    .section {
+        margin-bottom: 2rem;
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .section-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-header h2 i {
+        color: var(--emerald);
+    }
+    
+    /* Items Grid */
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+    
+    /* Table Styling */
+    .claims-table {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .claims-table .table td {
+        font-size: 0.9rem;
+    }
+    
+    .claim-item-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .claim-item-img {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--border-color);
+    }
+    
+    .claim-item-placeholder {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        background: var(--bg-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 1rem;
+        border: 1px solid var(--border-color);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+    }
+    
+    .empty-state-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 1rem;
+        background: var(--bg-muted);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: var(--text-muted);
+    }
+    
+    .empty-state h3 {
+        font-size: 1.15rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Notifications Section */
+    .notifications-section {
+        margin-bottom: 2rem;
+    }
+    
+    .notification-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .notification-card.warning {
+        border-left: 4px solid #f59e0b;
+        background: linear-gradient(90deg, rgba(251, 191, 36, 0.08), transparent);
+    }
+    
+    .notification-card.success {
+        border-left: 4px solid var(--emerald);
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.08), transparent);
+    }
+    
+    .notification-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+    
+    .notification-card.warning .notification-icon {
+        background: rgba(251, 191, 36, 0.15);
+        color: #f59e0b;
+    }
+    
+    .notification-card.success .notification-icon {
+        background: var(--emerald-bg);
+        color: var(--emerald);
+    }
+    
+    .notification-content {
+        flex: 1;
+    }
+    
+    .notification-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .notification-content p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin: 0 0 0.75rem 0;
+        line-height: 1.5;
+    }
+    
+    .claim-code {
+        display: inline-block;
+        background: var(--bg-muted);
+        border: 2px dashed var(--emerald);
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-family: monospace;
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        color: var(--emerald);
+    }
+    
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .items-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .items-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <img src="{{ url_for('static', filename='Logo/Logo.png') }}" alt="ISU Logo" class="page-header-logo">
+        <div>
+            <h1>My Dashboard</h1>
+            <p>Manage your reports and claims</p>
+        </div>
+    </div>
+    <div class="page-header-actions">
+        <a href="{{ url_for('new_report', type='lost') }}" class="btn btn-danger">
+            <i class="fas fa-exclamation-circle"></i> Report Lost
+        </a>
+        <a href="{{ url_for('new_report', type='found') }}" class="btn btn-primary">
+            <i class="fas fa-hand-holding"></i> Report Found
+        </a>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon lost">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ lost_reports|length }}</h3>
+            <p>Lost Reports</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon found">
+            <i class="fas fa-hand-holding"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ found_reports|length }}</h3>
+            <p>Found Reports</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon pending">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ pending_claims|length }}</h3>
+            <p>Pending Claims</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon resolved">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ approved_claims|length }}</h3>
+            <p>Approved Claims</p>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications Section -->
+{% if items_to_surrender or claims_to_pickup %}
+<div class="notifications-section">
+    <div class="section-header">
+        <h2><i class="fas fa-bell"></i> Action Required</h2>
+    </div>
+    
+    <!-- Items to Surrender (for finders) -->
+    {% for item in items_to_surrender %}
+    <div class="notification-card warning">
+        <div class="notification-icon">
+            <i class="fas fa-hand-holding"></i>
+        </div>
+        <div class="notification-content">
+            <h4>Surrender Item: {{ item.title }}</h4>
+            <p>A claim for this item has been approved. Please surrender the item to <strong>SCC Office</strong> as soon as possible.</p>
+            <a href="{{ url_for('report_detail', report_id=item.id) }}" class="btn btn-warning btn-sm">
+                <i class="fas fa-arrow-right"></i> View Details
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <!-- Claims to Pickup (for claimers) -->
+    {% for claim in claims_to_pickup %}
+    <div class="notification-card success">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="notification-content">
+            <h4>Claim Approved: {{ claim.report.title }}</h4>
+            <p>Your claim has been approved! Go to <strong>{{ claim.pickup_location or 'SCC Office' }}</strong> to collect your item. Present this code:</p>
+            <div class="claim-code">{{ claim.claim_code }}</div>
+            <p style="margin-top: 0.75rem; font-size: 0.85rem;">
+                <i class="fas fa-info-circle"></i> {{ claim.pickup_instructions or 'Office hours: 8:00 AM - 5:00 PM. Bring your Student ID.' }}
+            </p>
+            <a href="{{ url_for('report_detail', report_id=claim.report.id) }}" class="btn btn-primary btn-sm" style="margin-top: 0.5rem;">
+                <i class="fas fa-arrow-right"></i> View Item
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- My Reports -->
+<div class="section">
+    <div class="section-header">
+        <h2><i class="fas fa-file-alt"></i> My Reports</h2>
+        <a href="{{ url_for('search') }}" class="btn btn-secondary btn-sm">View All Items</a>
+    </div>
+    
+    {% set all_reports = lost_reports + found_reports %}
+    {% if all_reports %}
+    <div class="items-grid">
+        {% for report in all_reports[:6] %}
+        <div class="item-card">
+            <div class="item-card-image">
+                {% if report.photo_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + report.photo_filename) }}" alt="{{ report.title }}">
+                {% else %}
+                <div class="item-card-placeholder">
+                    <i class="fas fa-image"></i>
+                    <span>No image</span>
+                </div>
+                {% endif %}
+                <span class="badge {{ 'badge-lost' if report.type == 'lost' else 'badge-found' }} item-card-type">
+                    {{ report.type|capitalize }}
+                </span>
+                <span class="item-card-date">{{ report.created_at.strftime('%b %d') }}</span>
+            </div>
+            <div class="item-card-content">
+                <h4 class="item-card-title">{{ report.title }}</h4>
+                <p class="item-card-desc">{{ report.description|truncate(60) }}</p>
+                <div class="item-card-meta">
+                    <span><i class="fas fa-map-marker-alt"></i> {{ report.location }}</span>
+                    <span class="badge {{ 'badge-approved' if report.status == 'approved' else 'badge-pending' }}">
+                        {{ report.status|capitalize }}
+                    </span>
+                </div>
+            </div>
+            <div class="item-card-footer">
+                <a href="{{ url_for('report_detail', report_id=report.id) }}" class="btn btn-outline btn-block btn-sm">
+                    View Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-folder-open"></i>
+        </div>
+        <h3>No Reports Yet</h3>
+        <p>You haven't submitted any reports. Start by reporting a lost or found item.</p>
+        <div class="d-flex gap-2" style="justify-content: center;">
+            <a href="{{ url_for('new_report', type='lost') }}" class="btn btn-danger btn-sm">Report Lost</a>
+            <a href="{{ url_for('new_report', type='found') }}" class="btn btn-primary btn-sm">Report Found</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- My Claims -->
+<div class="section">
+    <div class="section-header">
+        <h2><i class="fas fa-hand-paper"></i> My Claims</h2>
+    </div>
+    
+    {% set all_claims = pending_claims + approved_claims %}
+    {% if all_claims %}
+    <div class="claims-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Claim Description</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for claim in all_claims %}
+                <tr>
+                    <td>
+                        <div class="claim-item-info">
+                            {% if claim.report.photo_filename %}
+                            <img src="{{ url_for('static', filename='uploads/' + claim.report.photo_filename) }}" alt="{{ claim.report.title }}" class="claim-item-img">
+                            {% else %}
+                            <div class="claim-item-placeholder">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            {% endif %}
+                            <span>{{ claim.report.title }}</span>
+                        </div>
+                    </td>
+                    <td>{{ claim.message|truncate(50) }}</td>
+                    <td>{{ claim.request_date.strftime('%b %d, %Y') }}</td>
+                    <td>
+                        <span class="badge {{ 'badge-approved' if claim.status == 'accepted' else 'badge-pending' }}">
+                            {{ claim.status|capitalize }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('report_detail', report_id=claim.report.id) }}" class="btn btn-secondary btn-sm">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-clipboard-list"></i>
+        </div>
+        <h3>No Claims Yet</h3>
+        <p>You haven't made any claims. Browse items to find something that belongs to you.</p>
+        <a href="{{ url_for('search') }}" class="btn btn-primary btn-sm">Browse Items</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

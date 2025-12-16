@@ -1,0 +1,16 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-WTF
+Flask-Migrate
+Pillow
+Werkzeug
+email-validator
+python-dotenv
+Flask-Bcrypt
+# Data Analytics Libraries
+pandas
+numpy
+matplotlib
+scikit-learn
+wordcloud
