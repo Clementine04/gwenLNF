@@ -8,6 +8,7 @@ Werkzeug
 email-validator
 python-dotenv
 Flask-Bcrypt
+gunicorn
 # Data Analytics Libraries
 pandas
 numpy

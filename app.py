@@ -701,17 +701,16 @@ def admin_stats():
         potential_matches=potential_matches
     )
 
-# Run the app
-if __name__ == '__main__':
-    # Create the database if it doesn't exist
-    with app.app_context():
-        # Create tables
-        db.create_all()
-        
-        # Check for schema updates by inspecting tables
-        inspector = inspect(db.engine)
-        
-        # Check if lost_report_id column exists in claim_requests table
+# Database initialization function
+def init_db():
+    """Initialize database tables and create default admin user"""
+    db.create_all()
+    
+    # Check for schema updates by inspecting tables
+    inspector = inspect(db.engine)
+    
+    # Check if lost_report_id column exists in claim_requests table
+    try:
         columns = [column['name'] for column in inspector.get_columns('claim_requests')]
         if 'lost_report_id' not in columns:
             print("Database schema needs updating but SQLite doesn't support adding foreign key constraints.")
@@ -720,12 +719,21 @@ if __name__ == '__main__':
             print("2. Delete the database file (lostnfound.db)")
             print("3. Restart the application to recreate the database with the new schema")
             print("The application will continue to run, but matching functionality might be limited.")
-        
-        # Create admin user if no users exist
-        if not User.query.first():
-            hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
-            admin = User(name='Admin', email='admin@isu.edu', password_hash=hashed_password, role='admin')
-            db.session.add(admin)
-            db.session.commit()
+    except Exception:
+        pass  # Table doesn't exist yet, will be created
     
+    # Create admin user if no users exist
+    if not User.query.first():
+        hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+        admin = User(name='Admin', email='admin@isu.edu', password_hash=hashed_password, role='admin')
+        db.session.add(admin)
+        db.session.commit()
+        print("Default admin user created: admin@isu.edu / admin123")
+
+# Initialize database on app startup (works with Gunicorn)
+with app.app_context():
+    init_db()
+
+# Run the app (only for local development)
+if __name__ == '__main__':
     app.run(debug=True) 

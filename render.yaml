@@ -1,0 +1,16 @@
+# Render Blueprint - ISU Lost n Found
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: isu-lost-n-found
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URI
+        value: sqlite:///lostnfound.db
+      - key: PYTHON_VERSION
+        value: 3.11.0
